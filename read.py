@@ -50,14 +50,24 @@ def readline(a_serial, eol=b'\r\n'):
             break
     return (line)
 
+def str2hexstr(line):
+  return " ".join(hex(ord(n)) for n in line)
 
 while True:
     try:
         line = readline(ser)
         line_str = bytes(line)
-        print "len = %d\r\n" % len(line_str)
-        line_hex = " ".join(hex(ord(n)) for n in line_str)
-        #(rc, mid) = client.publish("CMMC/espnow/hello", (line_hex), qos=1) 
+        line_hex = str2hexstr(line_str)
+        print "len = %d" % len(line_str)
+        b_header = line[0:2]
+        b_mac1 = line[2:8]
+        b_mac2 = line[8:14]
+        msglen = line[14]
+        msg = line[15:15+msglen]
+        print str2hexstr(bytes(b_header))
+        print str2hexstr(bytes(b_mac1))
+        print msglen
+        print str2hexstr(bytes(msg))
         (rc, mid) = client.publish("CMMC/espnow/hello", line[:-2], qos=1) 
     except Exception as e:
         print e
