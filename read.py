@@ -1,5 +1,19 @@
 import serial, sys, time, commands, re 
 import logging
+import paho.mqtt.client as paho
+import time 
+#reload(sys)  
+#sys.setdefaultencoding('utf8')
+
+def on_publish(client, userdata, mid):
+    #print("on_publish")
+    #print("mid: "+str(mid))
+    pass
+ 
+client = paho.Client()
+client.on_publish = on_publish
+client.connect("mqtt.cmmc.io", 1883)
+client.loop_start() 
 
 device = None
 baud = 9600
@@ -34,14 +48,17 @@ def readline(a_serial, eol=b'\r\n'):
                 break
         else:
             break
-    return bytes(line)
+    return (line)
 
 
 while True:
     try:
         line = readline(ser)
-        print "len = %d\r\n" % len(line)
-        print " ".join(hex(ord(n)) for n in line)
+        line_str = bytes(line)
+        print "len = %d\r\n" % len(line_str)
+        line_hex = " ".join(hex(ord(n)) for n in line_str)
+        #(rc, mid) = client.publish("CMMC/espnow/hello", (line_hex), qos=1) 
+        (rc, mid) = client.publish("CMMC/espnow/hello", line[:-2], qos=1) 
     except Exception as e:
         print e
     except KeyboardInterrupt:
